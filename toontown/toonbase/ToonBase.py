@@ -75,6 +75,15 @@ class ToonBase(OTPBase.OTPBase):
         if ConfigVariableBool('want-particles', 1).value == 1:
             self.notify.debug('Enabling particles')
             self.enableParticles()
+
+        self.MOVE_UP = 'arrow_up'
+        self.MOVE_DOWN = 'arrow_down'
+        self.MOVE_LEFT = 'arrow_left'
+        self.MOVE_RIGHT = 'arrow_right'
+        self.JUMP = 'control'
+        self.ACTION_BUTTON = 'delete'
+        self.SCREENSHOT_KEY = 'f9'
+
         self.accept(ToontownGlobals.ScreenshotHotkey, self.takeScreenShot)
         self.accept('panda3d-render-error', self.panda3dRenderError)
         oldLoader = self.loader

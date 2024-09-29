@@ -489,6 +489,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.forceJumpIdle = False
         self.numPies = 0
         self.pieType = 0
+        self.setBlend(frameBlend=True)
         self.pieModel = None
         self.__pieModelType = None
         self.pieScale = 1.0
@@ -672,12 +673,12 @@ class Toon(Avatar.Avatar, ToonHead):
 
     def setLODs(self):
         self.setLODNode()
-        levelOneIn = ConfigVariableInt('lod1-in', 20).value
+        levelOneIn = ConfigVariableInt('lod1-in', 500).value
         levelOneOut = ConfigVariableInt('lod1-out', 0).value
-        levelTwoIn = ConfigVariableInt('lod2-in', 80).value
-        levelTwoOut = ConfigVariableInt('lod2-out', 20).value
-        levelThreeIn = ConfigVariableInt('lod3-in', 280).value
-        levelThreeOut = ConfigVariableInt('lod3-out', 80).value
+        levelTwoIn = ConfigVariableInt('lod2-in', 750).value
+        levelTwoOut = ConfigVariableInt('lod2-out', 500).value
+        levelThreeIn = ConfigVariableInt('lod3-in', 1000).value
+        levelThreeOut = ConfigVariableInt('lod3-out', 750).value
         self.addLOD(1000, levelOneIn, levelOneOut)
         self.addLOD(500, levelTwoIn, levelTwoOut)
         self.addLOD(250, levelThreeIn, levelThreeOut)
@@ -1357,19 +1358,22 @@ class Toon(Avatar.Avatar, ToonHead):
 
     def setSpeed(self, forwardSpeed, rotateSpeed):
         self.forwardSpeed = forwardSpeed
-        self.rotateSpeed = rotateSpeed
         action = None
         if self.standWalkRunReverse != None:
             if forwardSpeed >= ToontownGlobals.RunCutOff:
                 action = OTPGlobals.RUN_INDEX
             elif forwardSpeed > ToontownGlobals.WalkCutOff:
                 action = OTPGlobals.WALK_INDEX
+                rotateSpeed = rotateSpeed * 0.75
             elif forwardSpeed < -ToontownGlobals.WalkCutOff:
                 action = OTPGlobals.REVERSE_INDEX
-            elif rotateSpeed != 0.0:
+            elif self.rotateSpeed != 0.0:
                 action = OTPGlobals.WALK_INDEX
             else:
                 action = OTPGlobals.STAND_INDEX
+            if rotateSpeed != self.rotateSpeed:
+                self.lerpLookAt(Point3(-90 * rotateSpeed, 90 * rotateSpeed, 0.0), 0.39)
+                self.rotateSpeed = rotateSpeed
             anim, rate = self.standWalkRunReverse[action]
             self.motion.enter()
             self.motion.setState(anim, rate)
@@ -1448,6 +1452,7 @@ class Toon(Avatar.Avatar, ToonHead):
 
     def exitHappy(self):
         self.standWalkRunReverse = None
+        self.startLookAround()
         self.stop()
         self.motion.exit()
         return
@@ -1515,6 +1520,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.setActiveShadow(1)
 
     def exitWalk(self):
+        self.startLookAround()
         self.stop()
 
     def getJumpDuration(self):
@@ -1572,7 +1578,7 @@ class Toon(Avatar.Avatar, ToonHead):
         if not self.isDisguised:
             if self.playingAnim == 'running-jump-idle':
                 anim = 'running-jump-land'
-                skipStart = 0.2
+                skipStart = 0.0
             else:
                 anim = 'jump-land'
                 skipStart = 0.0
@@ -1588,6 +1594,8 @@ class Toon(Avatar.Avatar, ToonHead):
     def enterRun(self, animMultiplier = 1, ts = 0, callback = None, extraArgs = []):
         self.loop('run')
         self.setPlayRate(animMultiplier, 'run')
+
+        self.lerpLookAt(Point3(-90 * self.rotateSpeed, -90 * self.rotateSpeed, 99.0))
         Emote.globalEmote.disableBody(self, 'toon, enterRun')
         self.setActiveShadow(1)
 
