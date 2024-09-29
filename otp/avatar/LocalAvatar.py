@@ -75,7 +75,6 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         self.accept('wakeup', self.wakeUp)
         self.jumpLandAnimFixTask = None
         self.fov = OTPGlobals.DefaultCameraFov
-        self.accept('avatarMoving', self.clearPageUpDown)
         self.nametag2dNormalContents = Nametag.CSpeech
         self.showNametag2d()
         self.setPickable(0)
@@ -437,7 +436,7 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         if not self.isPageUp:
             self.isPageDown = 0
             self.isPageUp = 1
-            self.lerpCameraFov(70, 0.6)
+            self.lerpCameraFov(80, 0.6)
             self.setCameraPositionByIndex(self.cameraIndex)
         else:
             self.clearPageUpDown()
@@ -449,7 +448,7 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         if not self.isPageDown:
             self.isPageUp = 0
             self.isPageDown = 1
-            self.lerpCameraFov(70, 0.6)
+            self.lerpCameraFov(90, 0.6)
             self.setCameraPositionByIndex(self.cameraIndex)
         else:
             self.clearPageUpDown()
@@ -478,31 +477,31 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
 
     def initCameraPositions(self):
         camHeight = self.getClampedAvatarHeight()
-        heightScaleFactor = camHeight * 0.3333333333
+        heightScaleFactor = camHeight * 0.5
         defLookAt = Point3(0.0, 1.5, camHeight)
         scXoffset = 3.0
         scPosition = (Point3(scXoffset - 1, -10.0, camHeight + 5.0), Point3(scXoffset, 2.0, camHeight))
-        self.cameraPositions = [(Point3(0.0, -9.0 * heightScaleFactor, camHeight),
+        self.cameraPositions = [(Point3(0.0, -10.0 * heightScaleFactor, camHeight + 2.5),
           defLookAt,
-          Point3(0.0, camHeight, camHeight * 4.0),
-          Point3(0.0, camHeight, camHeight * -1.0),
+          Point3(0.0, 1.5, camHeight * 2.0),
+          Point3(0.0, 10.0, camHeight),
           0),
          (Point3(0.0, 0.5, camHeight),
           defLookAt,
           Point3(0.0, camHeight, camHeight * 1.33),
           Point3(0.0, camHeight, camHeight * 0.66),
           1),
-         (Point3(5.7 * heightScaleFactor, 7.65 * heightScaleFactor, camHeight + 2.0),
+         (Point3(0.0, 5 * heightScaleFactor, camHeight),
           Point3(0.0, 1.0, camHeight),
-          Point3(0.0, 1.0, camHeight * 4.0),
-          Point3(0.0, 1.0, camHeight * -1.0),
-          0),
-         (Point3(0.0, -24.0 * heightScaleFactor, camHeight + 4.0),
+          Point3(0.0, 1.5, camHeight),
+          Point3(-1.3 * heightScaleFactor, 0.8, camHeight),
+          1),
+         (Point3(0.0, -18.0 * heightScaleFactor, camHeight + 4.0),
           defLookAt,
           Point3(0.0, 1.5, camHeight * 4.0),
           Point3(0.0, 1.5, camHeight * -1.0),
           0),
-         (Point3(0.0, -12.0 * heightScaleFactor, camHeight + 4.0),
+         (Point3(0.0, -12.0 * heightScaleFactor, camHeight + 22.0),
           defLookAt,
           Point3(0.0, 1.5, camHeight * 4.0),
           Point3(0.0, 1.5, camHeight * -1.0),
@@ -669,9 +668,11 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
             idealPos = self.getIdealCameraPos()
             distance = Vec3(idealPos - visPnt).length()
             ratio = self.closestObstructionDistance / distance
-            compromisePos = idealPos * ratio + visPnt * (1 - ratio)
-            liftMult = 1.0 - ratio * ratio
-            compromisePos = Point3(compromisePos[0], compromisePos[1], compromisePos[2] + self.getHeight() * 0.4 * liftMult)
+            compromisePos = idealPos * ratio + visPnt * (1.0 - (ratio * 0.3))
+            liftMult = 0.1
+            if not self.isPageDown:
+                liftMult = 1.0 - (ratio)
+            compromisePos = Point3(compromisePos[0], compromisePos[1], compromisePos[2] + 10 * liftMult)
         compromisePos.setZ(compromisePos[2] + self.cameraZOffset)
         return compromisePos
 
@@ -772,12 +773,15 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         return Task.cont
 
     def positionCameraWithPusher(self, pos, lookAt):
+        self.__instantaneousCamPos = camera.getPos()
         camera.setPos(pos)
+        if not self.__cameraHasBeenMoved:
+            self.nudgeCamera()
         self.ccPusherTrav.traverse(self.__geom)
         camera.lookAt(lookAt)
 
     def nudgeCamera(self):
-        CLOSE_ENOUGH = 0.1
+        CLOSE_ENOUGH = 0.4
         curCamPos = self.__instantaneousCamPos
         curCamHpr = camera.getHpr()
         targetCamPos = self.getCompromiseCameraPos()
@@ -794,13 +798,13 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
             hprDone = 1
         if posDone and hprDone:
             return
-        lerpRatio = 0.15
+        lerpRatio = 0.10
         lerpRatio = 1 - pow(1 - lerpRatio, globalClock.getDt() * 30.0)
         self.__instantaneousCamPos = targetCamPos * lerpRatio + curCamPos * (1 - lerpRatio)
         if self.__disableSmartCam or not self.__idealCameraObstructed:
             newHpr = targetCamHpr * lerpRatio + curCamHpr * (1 - lerpRatio)
         else:
-            newHpr = targetCamHpr
+            newHpr = targetCamHpr * lerpRatio + curCamHpr * (1 - lerpRatio)
         camera.setPos(self.__instantaneousCamPos)
         camera.setHpr(newHpr)
 
@@ -815,7 +819,7 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         collisionVec = Vec3(collisionPoint - self.ccLine.getPointA())
         distance = collisionVec.length()
         self.__idealCameraObstructed = 1
-        self.closestObstructionDistance = distance
+        self.closestObstructionDistance = distance * 0.7
         self.popCameraToDest()
 
     def handleCameraFloorInteraction(self):
