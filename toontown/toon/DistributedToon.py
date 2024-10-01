@@ -1188,15 +1188,11 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
         return
 
     def playSplashEffect(self, x, y, z):
-        if localAvatar.zoneId not in [ToontownGlobals.DonaldsDock, ToontownGlobals.OutdoorZone] and (not hasattr(localAvatar, 'inEstate') or localAvatar.inEstate != 1):
-            if random.random() < 0.1:
-                self.sendLogSuspiciousEvent('AvatarHackWarning! playing hacked splash effect')
-            return
         from toontown.effects import Splash
         if self.splash == None:
             self.splash = Splash.Splash(render)
         self.splash.setPos(x, y, z)
-        self.splash.setScale(2)
+        self.splash.setScale(1.5)
         self.splash.play()
         place = base.cr.playGame.getPlace()
         if place:
@@ -1205,6 +1201,7 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
         return
 
     def d_playSplashEffect(self, x, y, z):
+        self.playSplashEffect(x, y, z)
         self.sendUpdate('playSplashEffect', [x, y, z])
 
     def setTrackAccess(self, trackArray):

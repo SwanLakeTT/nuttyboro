@@ -224,6 +224,12 @@ def getWakeInfo(hoodId = None, zoneId = None):
         if canonicalZoneId == DonaldsDock:
             wakeWaterHeight = DDWakeWaterHeight
             showWake = 1
+        elif canonicalZoneId == MinniesMelodyland:
+            wakeWaterHeight = -15.17
+            showWake = 1
+        elif canonicalZoneId == DaisyGardens:
+            wakeWaterHeight = -1.0
+            showWake = 1
         elif canonicalZoneId == ToontownCentral:
             wakeWaterHeight = TTWakeWaterHeight
             showWake = 1

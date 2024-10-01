@@ -189,5 +189,10 @@ class ToonHood(Hood.Hood):
         for childFSM in minigameState.getChildren():
             minigameState.removeChild(childFSM)
 
+    def setNoFog(self):
+        if base.wantFog:
+            render.clearFog()
+            self.sky.clearFog()
+
     def handleMinigameDone(self):
         return None

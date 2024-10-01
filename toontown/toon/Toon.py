@@ -25,6 +25,10 @@ from . import AccessoryGlobals
 import importlib
 import functools
 
+from ..fishing import FishingTargetGlobals
+from ..toonbase.ToonBaseGlobal import base
+
+
 def teleportDebug(requestStatus, msg, onlyIfToAv = True):
     if teleportNotify.getDebug():
         teleport = 'teleport'
@@ -642,6 +646,7 @@ class Toon(Avatar.Avatar, ToonHead):
             self.generateToon()
             self.initializeDropShadow()
             self.initializeNametag3d()
+            self.setBlend(frameBlend=True)
 
     def parentToonParts(self):
         if self.hasLOD():
@@ -760,6 +765,7 @@ class Toon(Avatar.Avatar, ToonHead):
             else:
                 holeName = 'toon-portal'
             ha.setName(holeName)
+            ha.setBlend(frameBlend=True)
 
         return self.__holeActors
 
@@ -824,6 +830,7 @@ class Toon(Avatar.Avatar, ToonHead):
         del self.shadowJoint
         self.initializeDropShadow()
         self.initializeNametag3d()
+        self.setBlend(frameBlend=True)
 
     def generateToonTorso(self, copy = 1, genClothes = 1):
         torsoStyle = self.style.torso
@@ -861,6 +868,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.resetHeight()
         self.setupToonNodes()
         self.generateBackpack()
+        self.setBlend(frameBlend=True)
         hands = self.getRightHands()
         for bookActor, hand in zip(self.__bookActors, hands):
             bookActor.reparentTo(hand)
@@ -887,6 +895,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.resetHeight()
         self.eyelids.request('open')
         self.startLookAround()
+        self.setBlend(frameBlend=True)
 
     def generateToonColor(self):
         ToonHead.generateToonColor(self, self.style)
@@ -1372,7 +1381,7 @@ class Toon(Avatar.Avatar, ToonHead):
             else:
                 action = OTPGlobals.STAND_INDEX
             if rotateSpeed != self.rotateSpeed:
-                self.lerpLookAt(Point3(-90 * rotateSpeed, 90 * rotateSpeed, 0.0), 0.39)
+                self.lerpLookAt(Point3(-90 * rotateSpeed, 90 * rotateSpeed, 9.0 * forwardSpeed), 0.39)
                 self.rotateSpeed = rotateSpeed
             anim, rate = self.standWalkRunReverse[action]
             self.motion.enter()
@@ -1524,7 +1533,7 @@ class Toon(Avatar.Avatar, ToonHead):
         self.stop()
 
     def getJumpDuration(self):
-        if self.playingAnim == 'neutral':
+        if self.playingAnim == 'neutral' or self.playingAnim == 'walk':
             return self.getDuration('jump', 'legs')
         else:
             return self.getDuration('running-jump', 'legs')
@@ -1532,6 +1541,8 @@ class Toon(Avatar.Avatar, ToonHead):
     def enterJump(self, animMultiplier = 1, ts = 0, callback = None, extraArgs = []):
         if not self.isDisguised:
             if self.playingAnim == 'neutral':
+                anim = 'jump'
+            elif self.playingAnim == 'walk':
                 anim = 'jump'
             else:
                 anim = 'running-jump'
@@ -1542,11 +1553,15 @@ class Toon(Avatar.Avatar, ToonHead):
 
     def exitJump(self):
         self.stop()
-        self.playingAnim = 'neutral'
+        anim = 'jump-land'
+        self.playingAnim = anim
+        self.play(anim)
 
     def enterJumpSquat(self, animMultiplier = 1, ts = 0, callback = None, extraArgs = []):
         if not self.isDisguised:
             if self.playingAnim == 'neutral':
+                anim = 'jump-squat'
+            elif self.forwardSpeed < 1.0:
                 anim = 'jump-squat'
             else:
                 anim = 'running-jump-squat'
@@ -1557,45 +1572,58 @@ class Toon(Avatar.Avatar, ToonHead):
 
     def exitJumpSquat(self):
         self.stop()
-        self.playingAnim = 'neutral'
+        self.playingAnim = 'jump-land'
 
     def enterJumpAirborne(self, animMultiplier = 1, ts = 0, callback = None, extraArgs = []):
         if not self.isDisguised:
-            if self.playingAnim == 'neutral' or self.forceJumpIdle:
+            if self.playingAnim == 'neutral' or self.playingAnim == 'walk' or self.forceJumpIdle:
                 anim = 'jump-idle'
             else:
                 anim = 'running-jump-idle'
             self.playingAnim = anim
-            self.setPlayRate(animMultiplier, anim)
+            self.setPlayRate(animMultiplier * 0.8, anim)
             self.loop(anim)
         self.setActiveShadow(1)
 
     def exitJumpAirborne(self):
         self.stop()
-        self.playingAnim = 'neutral'
+        self.playingAnim = 'jump-land'
+        self.jumpCallSplash()
+
+    def jumpCallSplash(self):
+        showWake, wakeWaterHeight = ZoneUtil.getWakeInfo()
+        if self.getZ(render) < wakeWaterHeight:
+            pos = base.localAvatar.getPos(render)
+            if showWake is not 0:
+                pos2 = wakeWaterHeight
+                base.localAvatar.d_playSplashEffect(pos[0], pos[1], pos2)
+            else:
+                return #whatre you gonna do about it BITCH
+            base.localAvatar.d_playSplashEffect(pos[0], pos[1], pos2)
 
     def enterJumpLand(self, animMultiplier = 1, ts = 0, callback = None, extraArgs = []):
         if not self.isDisguised:
             if self.playingAnim == 'running-jump-idle':
-                anim = 'running-jump-land'
+                anim = 'jump-land'
                 skipStart = 0.0
             else:
                 anim = 'jump-land'
                 skipStart = 0.0
             self.playingAnim = anim
+            self.jumpCallSplash()
             self.setPlayRate(animMultiplier, anim)
             self.play(anim)
         self.setActiveShadow(1)
 
     def exitJumpLand(self):
         self.stop()
-        self.playingAnim = 'neutral'
+        anim = 'jump-land'
+        self.playingAnim = anim
+        self.play(anim)
 
     def enterRun(self, animMultiplier = 1, ts = 0, callback = None, extraArgs = []):
         self.loop('run')
         self.setPlayRate(animMultiplier, 'run')
-
-        self.lerpLookAt(Point3(-90 * self.rotateSpeed, -90 * self.rotateSpeed, 99.0))
         Emote.globalEmote.disableBody(self, 'toon, enterRun')
         self.setActiveShadow(1)
 

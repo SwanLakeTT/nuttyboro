@@ -16,10 +16,12 @@ class TTSafeZoneLoader(SafeZoneLoader.SafeZoneLoader):
 
     def load(self):
         SafeZoneLoader.SafeZoneLoader.load(self)
+        self.submergeSound = base.loader.loadSfx('phase_5.5/audio/sfx/AV_jump_in_water.ogg')
         self.birdSound = list(map(base.loader.loadSfx, ['phase_4/audio/sfx/SZ_TC_bird1.ogg', 'phase_4/audio/sfx/SZ_TC_bird2.ogg', 'phase_4/audio/sfx/SZ_TC_bird3.ogg']))
 
     def unload(self):
         del self.birdSound
+        del self.submergeSound
         SafeZoneLoader.SafeZoneLoader.unload(self)
 
     def enter(self, requestStatus):

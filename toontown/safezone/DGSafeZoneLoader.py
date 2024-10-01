@@ -18,6 +18,7 @@ class DGSafeZoneLoader(SafeZoneLoader.SafeZoneLoader):
         self.bird2Sound = base.loader.loadSfx('phase_8/audio/sfx/SZ_DG_bird_02.ogg')
         self.bird3Sound = base.loader.loadSfx('phase_8/audio/sfx/SZ_DG_bird_03.ogg')
         self.bird4Sound = base.loader.loadSfx('phase_8/audio/sfx/SZ_DG_bird_04.ogg')
+        self.submergeSound = base.loader.loadSfx('phase_5.5/audio/sfx/AV_jump_in_water.ogg')
 
     def unload(self):
         SafeZoneLoader.SafeZoneLoader.unload(self)
@@ -25,6 +26,7 @@ class DGSafeZoneLoader(SafeZoneLoader.SafeZoneLoader):
         del self.bird2Sound
         del self.bird3Sound
         del self.bird4Sound
+        del self.submergeSound
 
     def enter(self, requestStatus):
         SafeZoneLoader.SafeZoneLoader.enter(self, requestStatus)

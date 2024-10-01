@@ -19,10 +19,12 @@ class TTPlayground(Playground.Playground):
 
     def enter(self, requestStatus):
         Playground.Playground.enter(self, requestStatus)
+        self.loader.hood.setFog()
         taskMgr.doMethodLater(1, self.__birds, 'TT-birds')
 
     def exit(self):
         Playground.Playground.exit(self)
+        self.loader.hood.setNoFog()
         taskMgr.remove('TT-birds')
 
     def __birds(self, task):

@@ -9,6 +9,7 @@ from toontown.toonbase import TTLocalizer
 from toontown.effects import DistributedFireworkShow
 from toontown.parties import DistributedPartyFireworksActivity
 from direct.directnotify import DirectNotifyGlobal
+from direct.interval.IntervalGlobal import *
 
 class ShtikerBook(DirectFrame, StateData.StateData):
     notify = DirectNotifyGlobal.directNotify.newCategory('ShtikerBook')
@@ -20,7 +21,7 @@ class ShtikerBook(DirectFrame, StateData.StateData):
         self.pages = []
         self.pageTabs = []
         self.currPageTabIndex = None
-        self.pageTabFrame = DirectFrame(parent=self, relief=None, pos=(0.93, 1, 0.575), scale=1.25)
+        self.pageTabFrame = DirectFrame(parent=self, relief=None, pos=(0.93, 1, 0.575), scale=1)
         self.pageTabFrame.hide()
         self.currPageIndex = None
         self.pageBeforeNews = None
@@ -57,20 +58,25 @@ class ShtikerBook(DirectFrame, StateData.StateData):
         if self.entered:
             return
         self.entered = 1
+        shtickerfade = base.render.colorScaleInterval(1.0, Vec4(0.05, 0.15, 0.4, 1), startColorScale=Vec4(1.0, 1.0, 1.0, 1.0), blendType='easeIn')
+        shtickerfade.start()
         messenger.send('releaseDirector')
         messenger.send('stickerBookEntered')
         base.playSfx(self.openSound)
         base.disableMouse()
-        base.render.hide()
         base.setBackgroundColor(0.05, 0.15, 0.4)
         base.setCellsAvailable([base.rightCells[0]], 0)
         self.oldMin2dAlpha = NametagGlobals.getMin2dAlpha()
         self.oldMax2dAlpha = NametagGlobals.getMax2dAlpha()
         NametagGlobals.setMin2dAlpha(0.8)
         NametagGlobals.setMax2dAlpha(1.0)
+        self.show()
         self.__isOpen = 1
         self.__setButtonVisibility()
-        self.show()
+        self.setScale(0.01)
+        Sequence(
+            LerpScaleInterval(self, .3, Vec3(1.25, 1.25, 0.85), Vec3(0.01, 0.01, 0), blendType='easeInOut'),
+            LerpScaleInterval(self, .15, Vec3(1, 1, 1), Vec3(1.25, 1.25, 0.85), blendType='easeInOut')).start()
         self.showPageArrows()
         if not self.safeMode:
             self.accept('shtiker-page-done', self.__pageDone)
@@ -85,10 +91,16 @@ class ShtikerBook(DirectFrame, StateData.StateData):
         if not self.entered:
             return
         self.entered = 0
+        Sequence(
+            LerpScaleInterval(self, .05, Vec3(1.25, 1.25, 0.85), Vec3(1.0, 1.0, 1.0), blendType='easeInOut'),
+            LerpScaleInterval(self, .15, Vec3(1.0, 1.0, 1.0), Vec3(0.10, 0.10, 1.10), blendType='easeInOut')).start()
         messenger.send('stickerBookExited')
         base.playSfx(self.closeSound)
         self.pages[self.currPageIndex].exit()
         base.render.show()
+        shtickerfadeout = base.render.colorScaleInterval(0.5, Vec4(1.0, 1.0, 1.0, 1.0), startColorScale=Vec4(0.05, 0.15, 0.4, 1), blendType='easeIn')
+        shtickerfadeout.start()
+        base.render.setColorScaleOff()
         setBlackBackground = 0
         for obj in list(base.cr.doId2do.values()):
             if isinstance(obj, DistributedFireworkShow.DistributedFireworkShow) or isinstance(obj, DistributedPartyFireworksActivity.DistributedPartyFireworksActivity):

@@ -27,6 +27,7 @@ class TTHood(ToonHood.ToonHood):
     def load(self):
         ToonHood.ToonHood.load(self)
         self.parentFSM.getStateNamed('TTHood').addChild(self.fsm)
+        self.fog = Fog('TTFog')
 
     def unload(self):
         self.parentFSM.getStateNamed('TTHood').removeChild(self.fsm)
@@ -37,6 +38,15 @@ class TTHood(ToonHood.ToonHood):
 
     def exit(self):
         ToonHood.ToonHood.exit(self)
+
+    def setFog(self):
+        if base.wantFog:
+            self.fog.setColor(0.5, 0.85, 1.0)
+            self.fog.setLinearRange(90.0, 700.0)
+            render.clearFog()
+            render.setFog(self.fog)
+            self.sky.clearFog()
+            self.sky.setFog(self.fog)
 
     def skyTrack(self, task):
         return SkyUtil.cloudSkyTrack(task)

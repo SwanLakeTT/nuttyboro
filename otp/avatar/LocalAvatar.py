@@ -112,7 +112,7 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
     def setSprinting(self):
         self.currentSpeed = OTPGlobals.ToonForwardSprintSpeed
         self.currentReverseSpeed = OTPGlobals.ToonReverseSpeed
-        self.controlManager.setSpeeds(OTPGlobals.ToonForwardSprintSpeed, OTPGlobals.ToonJumpForce * 1.3,
+        self.controlManager.setSpeeds(OTPGlobals.ToonForwardSprintSpeed, OTPGlobals.ToonJumpForce * 0.8,
                                       OTPGlobals.ToonReverseSpeed, OTPGlobals.ToonRotateSpeed)
         self.isSprinting = 1
         self.lerpFov(self.fov, self.fallbackFov + OTPGlobals.ToonSprintFovIncrease)
@@ -397,7 +397,6 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
     def jumpStart(self):
         if not self.sleepFlag and self.hp > 0:
             self.b_setAnimState('jumpAirborne', 1.0)
-            self.stopJumpLandTask()
 
     def returnToWalk(self, task):
         if self.sleepFlag:
@@ -409,22 +408,22 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         self.b_setAnimState(state, 1.0)
         return Task.done
 
-    if 1:
-        def jumpLandAnimFix(self, jumpTime):
-            if self.playingAnim != 'run' and self.playingAnim != 'walk':
-                return taskMgr.doMethodLater(jumpTime, self.returnToWalk, self.uniqueName('walkReturnTask'))
 
-        def jumpHardLand(self):
-            if self.allowHardLand():
-                self.b_setAnimState('jumpLand', 1.0)
-                self.stopJumpLandTask()
-                self.jumpLandAnimFixTask = self.jumpLandAnimFix(1.0)
-            if self.d_broadcastPosHpr:
-                self.d_broadcastPosHpr()
+    def jumpLandAnimFix(self, jumpTime):
+        if self.playingAnim != 'walk' and self.playingAnim != 'run':
+            return taskMgr.doMethodLater(jumpTime, self.returnToWalk, self.uniqueName('walkReturnTask'))
 
-        def jumpLand(self):
-            self.jumpLandAnimFixTask = self.jumpLandAnimFix(0.01)
-            if self.d_broadcastPosHpr:
+    def jumpHardLand(self):
+        if self.allowHardLand():
+            self.b_setAnimState('jumpLand', 1.0)
+            self.stopJumpLandTask()
+            self.jumpLandAnimFixTask = self.jumpLandAnimFix(1.0)
+        if self.d_broadcastPosHpr:
+            self.d_broadcastPosHpr()
+
+    def jumpLand(self):
+        self.jumpLandAnimFixTask = self.jumpLandAnimFix(0.01)
+        if self.d_broadcastPosHpr:
                 self.d_broadcastPosHpr()
 
     def setupAnimationEvents(self):

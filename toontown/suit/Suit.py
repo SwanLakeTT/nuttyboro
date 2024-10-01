@@ -345,6 +345,7 @@ class Suit(Avatar.Avatar):
         self.isDisguised = 0
         self.isWaiter = 0
         self.isRental = 0
+        self.setBlend(frameBlend=True)
         return
 
     def delete(self):
@@ -607,6 +608,7 @@ class Suit(Avatar.Avatar):
         self.getGeomNode().setScale(self.scale)
         self.generateHealthBar()
         self.generateCorporateMedallion()
+        self.setBlend(frameBlend=True)
         return
 
     def generateBody(self):
@@ -929,6 +931,7 @@ class Suit(Avatar.Avatar):
         self.loseActor.setScale(self.scale)
         self.loseActor.setPos(self.getPos())
         self.loseActor.setHpr(self.getHpr())
+        self.loseActor.setBlend(frameBlend=True)
         shadowJoint = self.loseActor.find('**/joint_shadow')
         dropShadow = loader.loadModel('phase_3/models/props/drop_shadow')
         dropShadow.setScale(0.45)
@@ -957,6 +960,7 @@ class Suit(Avatar.Avatar):
         self.getGeomNode().setScale(self.scale * 1.0173)
         self.generateHealthBar()
         self.generateCorporateMedallion()
+        self.setBlend(frameBlend=True)
         self.generateCorporateTie()
         self.setHeight(self.height)
         parts = self.findAllMatches('**/pPlane*')

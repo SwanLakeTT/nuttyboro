@@ -94,6 +94,7 @@ class DistributedButterfly(DistributedObject.DistributedObject):
         self.butterfly2.setH(180.0)
         self.butterfly2.reparentTo(self.butterflyNode)
         self.butterfly.setH(180.0)
+        self.butterfly.setBlend(frameBlend=True)
         self.butterfly.reparentTo(self.butterflyNode)
         self.__initCollisions()
         self.dropShadow = loader.loadModel('phase_3/models/props/drop_shadow')
