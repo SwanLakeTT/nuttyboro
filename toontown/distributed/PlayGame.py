@@ -300,9 +300,11 @@ class PlayGame(StateData.StateData):
 
     def enterTTHood(self, requestStatus):
         self.accept(self.hoodDoneEvent, self.handleHoodDone)
+        base.localAvatar.obscureFriendsListButton(1)
         self.hood.enter(requestStatus)
 
     def exitTTHood(self):
+        base.localAvatar.obscureFriendsListButton(-1)
         self._destroyHood()
 
     def enterDDHood(self, requestStatus):
