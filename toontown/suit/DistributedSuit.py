@@ -628,6 +628,9 @@ class DistributedSuit(DistributedSuitBase.DistributedSuitBase, DelayDeletable):
         if dialogue:
             base.playSfx(dialogue, node=self)
         elif chatFlags & CFSpeech != 0:
+            self.nametag3d.setScale(0.1)
+            Sequence(LerpScaleInterval(self.nametag3d, .25, Vec3(1.2, 1.2, 1.2), Vec3(0.01, 0.01, 0.01), blendType='easeInOut'),
+                     LerpScaleInterval(self.nametag3d, .2, Vec3(1.1, 1.1, 1.1), Vec3(1.2, 1.2, 1.2), blendType='easeInOut')).start()
             if self.nametag.getNumChatPages() > 0:
                 self.playDialogueForString(self.nametag.getChat())
                 if self.soundChatBubble != None:

@@ -181,6 +181,10 @@ class ToonBase(OTPBase.OTPBase):
         self.oldX = max(1, base.win.getXSize())
         self.oldY = max(1, base.win.getYSize())
         self.aspectRatio = float(self.oldX) / self.oldY
+        self.toonChatSounds = ConfigVariableBool('toon-chat-sounds', 1).value
+        self.setAntiAliasing()
+        self.render.setAntialias(AntialiasAttrib.MMultisample)
+        self.setVerticalSync()
         self.wantWASD =  (base.MOVE_FORWARD != 'arrow_up' and base.MOVE_BACKWARDS != 'arrow_down' and base.MOVE_LEFT != 'arrow_left'
                           and base.MOVE_RIGHT != 'arrow_right')
         return
@@ -193,6 +197,8 @@ class ToonBase(OTPBase.OTPBase):
         y = max(1, win.getYSize())
         maxX = base.pipe.getDisplayWidth()
         maxY = base.pipe.getDisplayHeight()
+        self.setAntiAliasing()
+        self.setVerticalSync()
         cwp = win.getProperties()
         originX = 0
         originY = 0
@@ -420,6 +426,23 @@ class ToonBase(OTPBase.OTPBase):
             self.cr.timeManager.setDisconnectReason(ToontownGlobals.DisconnectGraphicsError)
         self.cr.sendDisconnect()
         sys.exit()
+
+    def setAntiAliasing(self) -> None:
+        antialias = self.settings.getSetting("anti-aliasing", 4)
+        if antialias != 0:
+            loadPrcFileData("", "framebuffer-multisample 1")
+            loadPrcFileData("", f"multisamples {antialias}")
+            self.render.setAntialias(AntialiasAttrib.MMultisample, antialias)
+            self.aspect2d.setAntialias(AntialiasAttrib.MMultisample, antialias)
+        else:
+            loadPrcFileData("", "framebuffer-multisample 0")
+            loadPrcFileData("", "multisamples 0")
+            self.render.setAntialias(AntialiasAttrib.MNone)
+            self.aspect2d.setAntialias(AntialiasAttrib.MNone)
+
+    def setVerticalSync(self) -> None:
+        vsync = self.settings.getSetting("vertical-sync", "true")
+        loadPrcFileData('', f'sync-video {vsync}')
 
     def getShardPopLimits(self):
         if self.cr.productName == 'JP':

@@ -13,6 +13,11 @@ depth-bits 24
 audio-sfx-active #t
 audio-music-active #t
 aspect-ratio 1.333333
+sync-video #t
+anti-aliasing 
+framebuffer-multisample 0
+multisamples 4
+
 
 # Models/Resources
 model-path resources

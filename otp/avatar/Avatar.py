@@ -354,8 +354,6 @@ class Avatar(Actor, ShadowCaster):
             if base.talkAssistant.isThought(chatString):
                 self.nametag.setChat(base.talkAssistant.removeThoughtPrefix(chatString), CFThought)
             else:
-                self.nametag3d.setScale(0.1)
-                Sequence(LerpScaleInterval(self.nametag3d, .25, Vec3(1.2, 1.2, 1.2), Vec3(0.01, 0.01, 0.01), blendType='easeInOut'), LerpScaleInterval(self.nametag3d, .2, Vec3(1.1, 1.1, 1.1), Vec3(1.2, 1.2, 1.2), blendType='easeInOut')).start()
                 self.nametag.setChat(chatString, CFSpeech | CFTimeout)
 
     def clearChat(self):
@@ -524,6 +522,8 @@ class Avatar(Actor, ShadowCaster):
     def initializeNametag3d(self):
         self.deleteNametag3d()
         nametagNode = self.nametag.getNametag3d()
+        self.nametag3d.setScale(0.1)
+        Sequence(LerpScaleInterval(self.nametag3d, .25, Vec3(1.2, 1.2, 1.2), Vec3(0.01, 0.01, 0.01), blendType='easeInOut'), LerpScaleInterval(self.nametag3d, .2, Vec3(1.1, 1.1, 1.1), Vec3(1.2, 1.2, 1.2), blendType='easeInOut')).start()
         self.nametagNodePath = self.nametag3d.attachNewNode(nametagNode)
         iconNodePath = self.nametag.getNameIcon()
         for cJoint in self.getNametagJoints():
