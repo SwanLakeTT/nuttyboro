@@ -47,7 +47,7 @@ class ChatLog(DirectButton):
                            'bottomRight'])
         scaleNodes(nodes, 0.25)
 
-        args = {'parent': self.chatMgr.chatLogNode, 'relief': None, 'geom': gui, 'geom_scale': (1, 1, 0.55),
+        args = {'parent': self.chatMgr.chatLogNode, 'relief': None, 'geom': gui, 'geom_scale': (0.78, 0.78, 0.55),
                 'sortOrder': DGG.FOREGROUND_SORT_INDEX}
         kwargs.update(args)
         DirectButton.__init__(self, **kwargs)
@@ -59,17 +59,17 @@ class ChatLog(DirectButton):
         self.currentTab = 0
         self.chatTabs = []
         self.wantGlobalChat = ConfigVariableBool('want-global-chat', False)
-        mainTab = DirectButton(parent=self, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabMain,
+        mainTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabMain,
                                text_scale=0.25, text_pos=(0.6, -0.3, 0.0), scale=0.15, pos=(centerOffset, 0.0, 0.09),
                                command=self.__toggleButton, extraArgs=[0])
-        whisperTab = DirectButton(parent=self, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabWhispers,
+        whisperTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabWhispers,
                                   text_scale=0.25, text_pos=(0.6, -0.3, 0.0), text_fg=(0, 0, 0, 0.5), scale=0.15,
                                   pos=(buttonRowOffset + centerOffset, 0.0, 0.09), command=self.__toggleButton, extraArgs=[1])
-        systemTab = DirectButton(parent=self, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabSystem,
+        systemTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabSystem,
                                  text_scale=0.25, text_pos=(0.6, -0.3, 0.0), text_fg=(0, 0, 0, 0.5), scale=0.15,
-                                 pos=((buttonRowOffset * 3) + centerOffset, 0.0, 0.09), command=self.__toggleButton)
+                                 pos=((buttonRowOffset * 2) + centerOffset, 0.0, 0.09), command=self.__toggleButton)
         if self.wantGlobalChat:
-            globalTab = DirectButton(parent=self, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabGlobal,
+            globalTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabGlobal,
                                  text_scale=0.25, text_pos=(0.6, -0.3, 0.0), text_fg=(0, 0, 0, 0.5), scale=0.15,
                                  pos=((buttonRowOffset * 2) + centerOffset, 0.0, 0.09), command=self.__toggleButton, extraArgs=[2])
             systemTab['extraArgs'] = [3]
@@ -99,7 +99,7 @@ class ChatLog(DirectButton):
             realLog = []
             current = 0
             text = TextNode('text')
-            text.setWordwrap(23.5)
+            text.setWordwrap(17.5)
             text.setAlign(TextNode.ALeft)
             text.setTextColor(0, 0, 0, 1)
             text.setFont(ToontownGlobals.getToonFont())
@@ -158,7 +158,7 @@ class ChatLog(DirectButton):
 
         self.hotkey = None
 
-        self.opacity = 0.2
+        self.opacity = 0.5
         self.closeChatlog()
 
     def setGuildHint(self, hintText):
@@ -221,6 +221,9 @@ class ChatLog(DirectButton):
 
         del self.logs
         del self.texts
+        for chatTabs in self.chatTabs:
+            chatTabs.removeNode()
+        del self.chatTabs
 
         for textNode in self.textNodes:
             textNode.removeNode()

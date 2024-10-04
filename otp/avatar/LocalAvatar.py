@@ -95,7 +95,8 @@ class LocalAvatar(DistributedAvatar.DistributedAvatar, DistributedSmoothNode.Dis
         timeDif = time.time() - self.lastForwardPress
         # If we hit the forward key a second or less ago set state to sprinting
         if timeDif <= OTPGlobals.ToonDoubleTapSprintWindow:
-            self.setSprinting()
+            if self.avatarControlsEnabled:
+                self.setSprinting()
         # Otherwise update last time we pressed sprint key
         self.lastForwardPress = time.time()
 
