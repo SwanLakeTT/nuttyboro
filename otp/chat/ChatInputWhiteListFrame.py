@@ -3,8 +3,7 @@ from otp.otpbase import OTPGlobals
 import sys
 from direct.directnotify import DirectNotifyGlobal
 from direct.gui.DirectGui import *
-from panda3d.core import *
-from panda3d.otp import *
+from pandac.PandaModules import *
 from otp.otpbase import OTPLocalizer
 from direct.task import Task
 from otp.chat.ChatInputTyped import ChatInputTyped
@@ -78,8 +77,8 @@ class ChatInputWhiteListFrame(FSM.FSM, DirectFrame):
         DirectFrame.destroy(self)
 
     def delete(self):
-        self.ignore('arrow_up-up')
-        self.ignore('arrow_down-up')
+        self.ignore(f'{base.MOVE_FORWARD}-up')
+        self.ignore(f'{base.MOVE_BACKWARDS}-up')
 
     def requestMode(self, mode, *args):
         return self.request(mode, *args)

@@ -8,6 +8,7 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.distributed import ClockDelta
 from otp.avatar.ShadowCaster import ShadowCaster
 import random
+from direct.interval.IntervalGlobal import *
 from otp.otpbase import OTPRender
 from otp.otpbase.PythonUtil import recordCreationStack
 teleportNotify = DirectNotifyGlobal.directNotify.newCategory('Teleport')
@@ -353,6 +354,8 @@ class Avatar(Actor, ShadowCaster):
             if base.talkAssistant.isThought(chatString):
                 self.nametag.setChat(base.talkAssistant.removeThoughtPrefix(chatString), CFThought)
             else:
+                self.nametag3d.setScale(0.1)
+                Sequence(LerpScaleInterval(self.nametag3d, .25, Vec3(1.2, 1.2, 1.2), Vec3(0.01, 0.01, 0.01), blendType='easeInOut'), LerpScaleInterval(self.nametag3d, .2, Vec3(1.1, 1.1, 1.1), Vec3(1.2, 1.2, 1.2), blendType='easeInOut')).start()
                 self.nametag.setChat(chatString, CFSpeech | CFTimeout)
 
     def clearChat(self):
@@ -506,6 +509,7 @@ class Avatar(Actor, ShadowCaster):
                             dialogue = self.__chatDialogueList[pageNumber]
                         else:
                             dialogue = None
+                        messenger.send('addChatHistory', [self.getName(), None, None, None, self.__chatMessage])
                         self.playCurrentDialogue(dialogue, self.__chatFlags)
                 else:
                     self.clearChat()

@@ -360,6 +360,7 @@ class TalkAssistant(DirectObject.DirectObject):
             avatarName = self.findAvatarName(senderAvId)
         if not accountName and accountId:
             accountName = self.findPlayerName(accountId)
+        historyName = self.findName(senderAvId, 0)
         newMessage = TalkMessage(self.countMessage(), self.stampTime(), message, senderAvId, avatarName, accountId, accountName, None, None, None, None, TALK_OPEN, None)
         if senderAvId != localAvatar.doId:
             self.addHandle(senderAvId, newMessage)
@@ -376,6 +377,8 @@ class TalkAssistant(DirectObject.DirectObject):
                 self.historyComplete.append(newMessage)
                 self.historyOpen.append(newMessage)
                 messenger.send('NewOpenMessage', [newMessage])
+                messenger.send('addChatHistory', [historyName, None, None, None, message])
+
             if newMessage.getBody() == OTPLocalizer.AntiSpamInChat:
                 self.spamDictByDoId[senderAvId] = 1
             else:
@@ -437,6 +440,7 @@ class TalkAssistant(DirectObject.DirectObject):
                     self.historyComplete.append(newMessage)
                     self.historyGuild.append(newMessage)
                     messenger.send('NewOpenMessage', [newMessage])
+                    messenger.send('addChatHistory', [self.avatar.nametag.getDisplayName(), None, None, None, message])
                 if newMessage.getBody() == OTPLocalizer.AntiSpamInChat:
                     self.spamDictByDoId[senderAvId] = 1
                 else:
@@ -630,6 +634,7 @@ class TalkAssistant(DirectObject.DirectObject):
              message,
              [],
              0])
+            base.cr.chatHandler.sendChatMessage(message)
             messenger.send('chatUpdate', [message, chatFlags])
         return error
 
@@ -652,6 +657,7 @@ class TalkAssistant(DirectObject.DirectObject):
                  message,
                  [],
                  0], sendToId=receiverAvId)
+        base.cr.chatHandler.sendWhisperMessage(message, receiverAvId)
         return error
 
     def sendAccountTalk(self, message, receiverAccount):
