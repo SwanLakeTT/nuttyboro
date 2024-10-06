@@ -44,10 +44,10 @@ class DistributedFishingTargetAI(DistributedNodeAI):
         self.angle = random.random() * 360
         self.radius = random.random() * self.targetRadius
         # Pick the travel duration
-        self.time = 6.0 * (6.0 * random.random())
+        self.time = random.uniform(10.0, 5.0)
         # Send our new information to the clients...
         self.sendUpdate('setState', self.getState())
         # Move the target again in x seconds
-        self.doMethodLater(self.time + (1.0 + random.random() * 4.0), 
+        self.doMethodLater(self.time + random.uniform(5, 2.5),
                            self.moveFishingTarget,
                            self.uniqueName('moveFishingTarget'))

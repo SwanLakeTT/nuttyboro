@@ -1,3 +1,6 @@
+import random
+
+from direct.showbase.PythonUtil import lerp
 from panda3d.core import *
 from direct.distributed.ClockDelta import *
 from direct.interval.IntervalGlobal import *
@@ -7,7 +10,7 @@ from direct.distributed.DistributedObject import DistributedObject
 from direct.actor import Actor
 from . import FishingTargetGlobals
 import math
-from toontown.effects import Bubbles
+from toontown.effects import Ripples
 
 class DistributedFishingTarget(DistributedNode):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedFishingTarget')
@@ -20,23 +23,30 @@ class DistributedFishingTarget(DistributedNode):
         self.centerPoint: tuple[float, float, float] = (0.0, 0.0, 0.0)
         self.maxRadius: float = 1.0
         self.track: Sequence = None
+        self.track2: Sequence = None
 
     def generate(self):
         self.assign(render.attachNewNode('DistributedFishingTarget'))
-        shadow = loader.loadModel('phase_3/models/props/drop_shadow')
-        shadow.setPos(0, 0, -0.1)
-        shadow.setScale(0.33)
+        shadow = loader.loadModel('phase_3/models/props/fishshadow')
+        shadow.setPos(0, 0, -0.04)
+        shadow.setScale(0.35, 0.35, 0.35)
         shadow.setColorScale(1, 1, 1, 0.75)
         shadow.reparentTo(self)
-        self.bubbles = Bubbles.Bubbles(self, render)
+        self.bubbles = Ripples.Ripples(self)
+        self.bubbles.renderParent = shadow
         self.bubbles.renderParent.setDepthWrite(0)
-        self.bubbles.start()
+        self.bubbles.setScale(0.4)
+        self.bubbles.setPos(1, 0, 0)
+        self.bubbles.setColorScale(1, 1, 1, 0.88)
+        self.bubbles.play()
         DistributedNode.generate(self)
 
     def disable(self):
         if self.track:
             self.track.finish()
+            self.track2.finish()
             self.track = None
+            self.track2 = None
         self.bubbles.destroy()
         del self.bubbles
         self.pond.removeTarget(self)
@@ -61,11 +71,21 @@ class DistributedFishingTarget(DistributedNode):
 
     def setState(self, angle: float, radius: float, time: float, timeStamp: int):
         ts = globalClockDelta.localElapsedTime(timeStamp)
+        prevpos = self.getPos()
         pos = self.getDestPos(angle, radius)
+        destangle = math.atan2((pos[1] - prevpos[1]),
+                               (pos[0] - prevpos[0]))
+        self.bubbles.setH(360/math.tau * (destangle))
         if self.track and self.track.isPlaying():
             self.track.finish()
-        self.track = Sequence(LerpPosInterval(self, time - ts, Point3(*pos), blendType='easeInOut'))
+            self.track2.finish()
+        self.track = Sequence(LerpPosHprScaleInterval(self, (0.3 + lerp(0.05, 0.1, time)), Point3(*prevpos), (360/math.tau * (destangle), 0.0, 0.0), (1.0 - lerp(0.05, 0.075, time), 1.1, 1.0), blendType='easeInOut'),
+                              Func(self.bubbles.play, 1.0 + (0.025 * time)),
+                              LerpPosHprScaleInterval(self, time - ts - 0.6, Point3(*pos), (360/math.tau * (destangle), 0.0, 0.0), (1.0, 1.0, 1.0), blendType='easeOut'))
+        self.track2 = Sequence(LerpScaleInterval(self.bubbles, 0.5, lerp(0.005, 0.07, time), 0.01, blendType='easeOut'),
+                               Func(self.bubbles.setHpr, 0, 0, 0))
         self.track.start()
+        self.track2.start()
 
     def getRadius(self) -> float:
         return self.radius
