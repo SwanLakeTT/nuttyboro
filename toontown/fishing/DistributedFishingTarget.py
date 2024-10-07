@@ -22,6 +22,7 @@ class DistributedFishingTarget(DistributedNode):
         self.pond: DistributedObject | None = None
         self.centerPoint: tuple[float, float, float] = (0.0, 0.0, 0.0)
         self.maxRadius: float = 1.0
+        self.scaleRange = None
         self.track: Sequence = None
         self.track2: Sequence = None
 
@@ -29,13 +30,14 @@ class DistributedFishingTarget(DistributedNode):
         self.assign(render.attachNewNode('DistributedFishingTarget'))
         shadow = loader.loadModel('phase_3/models/props/fishshadow')
         shadow.setPos(0, 0, -0.04)
-        shadow.setScale(0.35, 0.35, 0.35)
-        shadow.setColorScale(1, 1, 1, 0.75)
+        self.scaleRange = random.uniform(0.5, (1.4 - (0.15 * (FishingTargetGlobals.getNumTargets(self.zoneId)))))
+        shadow.setScale(0.4 * self.scaleRange, 0.4 * (1.2 * self.scaleRange), 0.4 * self.scaleRange)
+        shadow.setColorScale(1, 1, 1, 0.95)
         shadow.reparentTo(self)
         self.bubbles = Ripples.Ripples(self)
         self.bubbles.renderParent = shadow
         self.bubbles.renderParent.setDepthWrite(0)
-        self.bubbles.setScale(0.4)
+        self.bubbles.setScale(0.6 * self.scaleRange, 0.45 * self.scaleRange, 0.6 * self.scaleRange)
         self.bubbles.setPos(1, 0, 0)
         self.bubbles.setColorScale(1, 1, 1, 0.88)
         self.bubbles.play()
@@ -79,11 +81,10 @@ class DistributedFishingTarget(DistributedNode):
         if self.track and self.track.isPlaying():
             self.track.finish()
             self.track2.finish()
-        self.track = Sequence(LerpPosHprScaleInterval(self, (0.3 + lerp(0.05, 0.1, time)), Point3(*prevpos), (360/math.tau * (destangle), 0.0, 0.0), (1.0 - lerp(0.05, 0.075, time), 1.1, 1.0), blendType='easeInOut'),
-                              Func(self.bubbles.play, 1.0 + (0.025 * time)),
+        self.track = Sequence(LerpPosHprScaleInterval(self, 0.3, Point3(*prevpos), (360/math.tau * (destangle), 0.0, 0.0), (1.0 - lerp(0.05, 0.075, time), 1.1, 1.0), blendType='easeInOut'),
+                              Func(self.bubbles.play, 0.8),
                               LerpPosHprScaleInterval(self, time - ts - 0.6, Point3(*pos), (360/math.tau * (destangle), 0.0, 0.0), (1.0, 1.0, 1.0), blendType='easeOut'))
-        self.track2 = Sequence(LerpScaleInterval(self.bubbles, 0.5, lerp(0.005, 0.07, time), 0.01, blendType='easeOut'),
-                               Func(self.bubbles.setHpr, 0, 0, 0))
+        self.track2 = Sequence(LerpPosInterval(self.bubbles, 4 + (0.2 * time), (-3.5 - (0.35 * time), 0, 0), (1 + 1.5 * self.scaleRange, 0, 0), blendType='easeOut'))
         self.track.start()
         self.track2.start()
 

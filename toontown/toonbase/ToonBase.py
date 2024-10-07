@@ -1,3 +1,5 @@
+from time import sleep
+
 from otp.otpbase import OTPBase
 from otp.otpbase import OTPLauncherGlobals
 from otp.otpbase import OTPGlobals
@@ -350,6 +352,7 @@ class ToonBase(OTPBase.OTPBase):
             gameServer = '127.0.0.1'
         serverPort = ConfigVariableInt('server-port', 7198).value
         serverList = []
+
         for name in gameServer.split(';'):
             url = URLSpec(name, 1)
             if ConfigVariableBool('server-want-ssl', False).value:
@@ -431,7 +434,7 @@ class ToonBase(OTPBase.OTPBase):
         antialias = self.settings.getSetting("anti-aliasing", 4)
         if antialias != 0:
             loadPrcFileData("", "framebuffer-multisample 1")
-            loadPrcFileData("", f"multisamples {antialias}")
+            loadPrcFileData("", "multisamples {antialias}")
             self.render.setAntialias(AntialiasAttrib.MMultisample, antialias)
             self.aspect2d.setAntialias(AntialiasAttrib.MMultisample, antialias)
         else:
@@ -442,7 +445,7 @@ class ToonBase(OTPBase.OTPBase):
 
     def setVerticalSync(self) -> None:
         vsync = self.settings.getSetting("vertical-sync", "true")
-        loadPrcFileData('', f'sync-video {vsync}')
+        loadPrcFileData("", "sync-video {vsync}")
 
     def getShardPopLimits(self):
         if self.cr.productName == 'JP':
