@@ -40,7 +40,6 @@ class StatsMeter(DirectFrame):
         del self.style
         del self.av
         del self.moneyvalue
-        del self.beanJar
         del self.moneyLabel
         DirectFrame.destroy(self)
 

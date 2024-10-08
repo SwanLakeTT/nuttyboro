@@ -16,7 +16,8 @@ class ChatLog(DirectButton):
         self.chatMgr = chatMgr
         gui = loader.loadModel('phase_3/models/gui/ChatPanel')
         self.wantGuildChat = ConfigVariableBool('want-guild-chat', False)
-
+        lognode = self.chatMgr.chatLogNode
+        lognode.setPos(-0.82, 0.0, -0.75)
         def findNodes(names, model = gui):
             results = []
             for name in names:
@@ -47,7 +48,7 @@ class ChatLog(DirectButton):
                            'bottomRight'])
         scaleNodes(nodes, 0.25)
 
-        args = {'parent': self.chatMgr.chatLogNode, 'relief': None, 'geom': gui, 'geom_scale': (0.78, 0.78, 0.55),
+        args = {'parent': self.chatMgr.chatLogNode, 'relief': None, 'geom': gui, 'geom_scale': (1.7, 0.78, 0.25),
                 'sortOrder': DGG.FOREGROUND_SORT_INDEX}
         kwargs.update(args)
         DirectButton.__init__(self, **kwargs)
@@ -59,15 +60,15 @@ class ChatLog(DirectButton):
         self.currentTab = 0
         self.chatTabs = []
         self.wantGlobalChat = ConfigVariableBool('want-global-chat', False)
-        mainTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabMain,
-                               text_scale=0.25, text_pos=(0.6, -0.3, 0.0), scale=0.15, pos=(centerOffset, 0.0, 0.09),
+        mainTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.4), text=TTLocalizer.ChatLogTabMain,
+                               text_scale=0.25, text_pos=(0.6, -0.3, 1), scale=0.15, pos=(centerOffset, 0.0, 0.06),
                                command=self.__toggleButton, extraArgs=[0])
-        whisperTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabWhispers,
-                                  text_scale=0.25, text_pos=(0.6, -0.3, 0.0), text_fg=(0, 0, 0, 0.5), scale=0.15,
-                                  pos=(buttonRowOffset + centerOffset, 0.0, 0.09), command=self.__toggleButton, extraArgs=[1])
-        systemTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabSystem,
-                                 text_scale=0.25, text_pos=(0.6, -0.3, 0.0), text_fg=(0, 0, 0, 0.5), scale=0.15,
-                                 pos=((buttonRowOffset * 2) + centerOffset, 0.0, 0.09), command=self.__toggleButton)
+        whisperTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.4), text=TTLocalizer.ChatLogTabWhispers,
+                                  text_scale=0.25, text_pos=(0.6, -0.3, 1), text_fg=(0, 0, 0, 0.5), scale=0.15,
+                                  pos=(buttonRowOffset + centerOffset, 0.0, 0.06), command=self.__toggleButton, extraArgs=[1])
+        systemTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.4), text=TTLocalizer.ChatLogTabSystem,
+                                 text_scale=0.25, text_pos=(0.6, -0.3, 1), text_fg=(0, 0, 0, 0.5), scale=0.15,
+                                 pos=((buttonRowOffset * 2) + centerOffset, 0.0, 0.06), command=self.__toggleButton)
         if self.wantGlobalChat:
             globalTab = DirectButton(parent=self.chatMgr.chatLogNode, relief=None, geom=gui, geom_scale=(1.2, 1, 0.55), text=TTLocalizer.ChatLogTabGlobal,
                                  text_scale=0.25, text_pos=(0.6, -0.3, 0.0), text_fg=(0, 0, 0, 0.5), scale=0.15,
@@ -99,13 +100,13 @@ class ChatLog(DirectButton):
             realLog = []
             current = 0
             text = TextNode('text')
-            text.setWordwrap(17.5)
+            text.setWordwrap(60)
             text.setAlign(TextNode.ALeft)
             text.setTextColor(0, 0, 0, 1)
             text.setFont(ToontownGlobals.getToonFont())
             textNode = self.attachNewNode(text, 0)
-            textNode.setPos(0.0, 0.0, -0.05)
-            textNode.setScale(0.04)
+            textNode.setPos(-0.01, 0.0, -0.025)
+            textNode.setScale(0.03)
             notificationBubble = DirectLabel(self, relief=None, scale=0.075, pos=chatTabPos, text='0', text_pos=(2.0, 0.0, 0.0), text_fg=(1, 0, 0, 1), text_shadow=(0, 0, 0, 1))
             notificationBubble.hide()
             self.logs.append(log)
@@ -141,16 +142,16 @@ class ChatLog(DirectButton):
         self.closed = False
 
         # Left clicking the Chat Log will drag it around the screen
-        self.bind(DGG.B1PRESS, self.dragStart)
-        self.bind(DGG.B1RELEASE, self.dragStop)
+        # self.bind(DGG.B1PRESS, self.dragStart)
+        # self.bind(DGG.B1RELEASE, self.dragStop)
 
         # Right clicking the Chat Log will scale it up and down
-        self.bind(DGG.B3PRESS, self.scaleStart)
-        self.bind(DGG.B3RELEASE, self.scaleStop)
+        # self.bind(DGG.B3PRESS, self.scaleStart)
+        # self.bind(DGG.B3RELEASE, self.scaleStop)
 
         # Middle mouse button will go through the allowed opacities
-        self.bind(DGG.B2PRESS, self.opacityStart, extraArgs=[True])
-        self.bind(DGG.B2RELEASE, self.opacityStart, extraArgs=[False])
+        # self.bind(DGG.B2PRESS, self.opacityStart, extraArgs=[True])
+        # self.bind(DGG.B2RELEASE, self.opacityStart, extraArgs=[False])
 
         self.accept('addChatHistory', self.__addChatHistory)
         self.accept('SpeedChatStyleChange', self.__updateSpeedChatStyle)
@@ -237,7 +238,6 @@ class ChatLog(DirectButton):
     def show(self):
         if self.closed:
             return
-
         DirectButton.show(self)
         node = self.chatMgr.chatLogNode
         node.show()
@@ -247,12 +247,18 @@ class ChatLog(DirectButton):
         self.bind(DGG.EXIT, self.ignoreWheelMovements)
 
     def hide(self):
+
         DirectButton.hide(self)
         node = self.chatMgr.chatLogNode
         node.hide()
         self.ignoreWheelMovements()
 
     def closeChatlog(self):
+        base.setCellsAvailable([base.bottomCells[0]], 1)
+        base.setCellsAvailable([base.bottomCells[1]], 1)
+        base.setCellsAvailable([base.bottomCells[2]], 1)
+        base.setCellsAvailable([base.bottomCells[3]], 1)
+        base.setCellsAvailable([base.bottomCells[4]], 1)
         self.closed = True
         self.hide()
 
@@ -262,7 +268,11 @@ class ChatLog(DirectButton):
 
         if not base.localAvatar.tutorialAck:
             return
-
+        base.setCellsAvailable([base.bottomCells[0]], 0)
+        base.setCellsAvailable([base.bottomCells[1]], 0)
+        base.setCellsAvailable([base.bottomCells[2]], 0)
+        base.setCellsAvailable([base.bottomCells[3]], 0)
+        base.setCellsAvailable([base.bottomCells[4]], 0)
         self.closed = False
         self.show()
 
@@ -273,7 +283,7 @@ class ChatLog(DirectButton):
             self.closeChatlog()
 
     def scrollToCurrent(self, tab):
-        minimum = max(0, self.currents[tab] - 12)
+        minimum = max(0, self.currents[tab] - 8)
         self.texts[tab].setText('\n'.join(self.realLogs[tab][minimum:self.currents[tab]]))
 
     def computeRealLog(self, tab, opening=False, forcePush=False):
