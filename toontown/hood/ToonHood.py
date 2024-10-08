@@ -90,6 +90,7 @@ class ToonHood(Hood.Hood):
         messenger.send('enterSafeZone')
         DistributedAvatar.DistributedAvatar.HpTextEnabled = 0
         base.localAvatar.laffMeter.start()
+        base.localAvatar.statsMeter.start()
         self.purchaseDoneEvent = 'purchaseDone'
         self.accept(self.purchaseDoneEvent, self.handlePurchaseDone)
         self.purchase = Purchase.Purchase(base.localAvatar, pointsAwarded, playerMoney, playerIds, playerStates, remain, self.purchaseDoneEvent, metagameRound, votesArray)
@@ -100,6 +101,7 @@ class ToonHood(Hood.Hood):
         messenger.send('exitSafeZone')
         DistributedAvatar.DistributedAvatar.HpTextEnabled = 1
         base.localAvatar.laffMeter.stop()
+        base.localAvatar.statsMeter.stop()
         self.ignore(self.purchaseDoneEvent)
         self.purchase.exit()
         self.purchase.unload()
@@ -175,6 +177,7 @@ class ToonHood(Hood.Hood):
         messenger.send('enterSafeZone')
         DistributedAvatar.DistributedAvatar.HpTextEnabled = 0
         base.localAvatar.laffMeter.start()
+        base.localAvatar.statsMeter.start()
         base.cr.forbidCheesyEffects(1)
         self.acceptOnce(self.minigameDoneEvent, self.handleMinigameDone)
         return None
@@ -183,6 +186,7 @@ class ToonHood(Hood.Hood):
         messenger.send('exitSafeZone')
         DistributedAvatar.DistributedAvatar.HpTextEnabled = 1
         base.localAvatar.laffMeter.stop()
+        base.localAvatar.statsMeter.stop()
         base.cr.forbidCheesyEffects(0)
         self.ignore(self.minigameDoneEvent)
         minigameState = self.fsm.getStateNamed('minigame')

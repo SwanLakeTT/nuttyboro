@@ -47,7 +47,7 @@ from toontown.estate import GardenGlobals
 from toontown.battle.BattleSounds import *
 from toontown.battle import Fanfare
 from toontown.parties import PartyGlobals
-from toontown.toon import ElevatorNotifier
+from toontown.toon import ElevatorNotifier, StatsMeter
 from toontown.toon import ToonDNA
 from . import DistributedToon
 from . import Toon
@@ -243,7 +243,9 @@ class LocalToon(DistributedToon.DistributedToon, LocalAvatar.LocalAvatar):
 
     def disable(self):
         self.laffMeter.destroy()
+        self.statsMeter.destroy()
         del self.laffMeter
+        del self.statsMeter
         self.questMap.destroy()
         self.questMap = None
         if hasattr(self, 'purchaseButton'):
@@ -368,13 +370,18 @@ class LocalToon(DistributedToon.DistributedToon, LocalAvatar.LocalAvatar):
             self.addNewsPage()
         self.book.setPage(self.mapPage, enterPage=False)
         self.laffMeter = LaffMeter.LaffMeter(self.style, self.hp, self.maxHp)
+        self.statsMeter = StatsMeter.StatsMeter(self.style, self.hp, self.maxHp)
         self.laffMeter.setAvatar(self)
+        self.statsMeter.setAvatar(self)
         self.laffMeter.setScale(0.075)
+        self.statsMeter.setScale(0.43)
+        self.statsMeter.setPos(-0.98, 0.0, -0.87)
         if self.style.getAnimal() == 'monkey':
             self.laffMeter.setPos(-1.18, 0.0, -0.87)
         else:
             self.laffMeter.setPos(-1.2, 0.0, -0.87)
         self.laffMeter.stop()
+        self.statsMeter.stop()
         self.questMap = QuestMap.QuestMap(self)
         self.questMap.stop()
         if not base.cr.isPaid():
